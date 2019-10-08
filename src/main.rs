@@ -57,8 +57,8 @@ fn get_naming_style(naming: &str) -> Naming {
     lazy_static! {
         static ref PASCAL_REGEX: Regex = Regex::new("^[A-Z][a-z]+(?:[A-Z][a-z]+)+$").unwrap();
         static ref CAMEL_REGEX: Regex = Regex::new("^[a-z]+(?:[A-Z][a-z]+)+$").unwrap();
-        static ref SNAKE_REGEX: Regex = Regex::new("^[a-z]+(?:[_a-z]+)+$").unwrap();
-        static ref KEBAB_REGEX: Regex = Regex::new("^[a-z]+(?:[-a-z]+)+$").unwrap();
+        static ref SNAKE_REGEX: Regex = Regex::new("^[a-z]+(?:_[a-z]+)+$").unwrap();
+        static ref KEBAB_REGEX: Regex = Regex::new("^[a-z]+(?:-[a-z]+)+$").unwrap();
         static ref LOWER_REGEX: Regex = Regex::new("[a-z]+").unwrap();
     }
     let mut style = Naming::Unknown;
