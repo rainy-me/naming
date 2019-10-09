@@ -43,7 +43,19 @@ struct File {
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let resp: Response = reqwest::get(&url())?.json()?;
-    println!("{:#?}", resp);
+    let filenames: Vec<Option<&str>> = resp
+        .tree
+        .iter()
+        .filter(|file| file.r#type == "blob")
+        .map(|file| file.path.rsplitn(2, '/').next().to_owned())
+        .collect::<Vec<_>>();
+
+    for file in filenames.iter() {
+        if let Some(filename) = file {
+            println!("the value is: {}", *filename);
+        }
+    }
+
     Ok(())
 }
 
