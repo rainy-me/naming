@@ -55,30 +55,30 @@ fn url() -> String {
 
 fn get_naming_style(naming: &str) -> Naming {
     lazy_static! {
-        static ref PASCAL_REGEX: Regex = Regex::new("^[A-Z][a-z]+(?:[A-Z][a-z]+)+$").unwrap();
-        static ref CAMEL_REGEX: Regex = Regex::new("^[a-z]+(?:[A-Z][a-z]+)+$").unwrap();
-        static ref SNAKE_REGEX: Regex = Regex::new("^[a-z]+(?:_[a-z]+)+$").unwrap();
-        static ref KEBAB_REGEX: Regex = Regex::new("^[a-z]+(?:-[a-z]+)+$").unwrap();
-        static ref LOWER_REGEX: Regex = Regex::new("[a-z]+").unwrap();
+        static ref PASCAL_RE: Regex = Regex::new("^[A-Z][a-z]+(?:[A-Z][a-z]+)+$").unwrap();
+        static ref CAMEL_RE: Regex = Regex::new("^[a-z]+(?:[A-Z][a-z]+)+$").unwrap();
+        static ref SNAKE_RE: Regex = Regex::new("^[a-z]+(?:_[a-z]+)+$").unwrap();
+        static ref KEBAB_RE: Regex = Regex::new("^[a-z]+(?:-[a-z]+)+$").unwrap();
+        static ref LOWER_RE: Regex = Regex::new("[a-z]+").unwrap();
     }
     let mut style = Naming::Unknown;
-    if PASCAL_REGEX.is_match(naming) {
+    if PASCAL_RE.is_match(naming) {
         style = Naming::Pascal;
         return style;
     }
-    if CAMEL_REGEX.is_match(naming) {
+    if CAMEL_RE.is_match(naming) {
         style = Naming::Camel;
         return style;
     }
-    if SNAKE_REGEX.is_match(naming) {
+    if SNAKE_RE.is_match(naming) {
         style = Naming::Snake;
         return style;
     }
-    if KEBAB_REGEX.is_match(naming) {
+    if KEBAB_RE.is_match(naming) {
         style = Naming::Kebab;
         return style;
     }
-    if LOWER_REGEX.is_match(naming) {
+    if LOWER_RE.is_match(naming) {
         style = Naming::Lower;
         return style;
     }
