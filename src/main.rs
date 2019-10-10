@@ -16,6 +16,7 @@ enum Naming {
     Snake,
     Kebab,
     Lower,
+    Upper,
     Unknown,
 }
 
@@ -41,18 +42,26 @@ struct File {
     url: String,
     size: Option<u64>,
 }
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let resp: Response = reqwest::get(&url())?.json()?;
     let filenames: Vec<Option<&str>> = resp
         .tree
         .iter()
         .filter(|file| file.r#type == "blob")
-        .map(|file| file.path.rsplitn(2, '/').next().to_owned())
+        .map(|file| file.path.rsplitn(2, '/').next())
         .collect::<Vec<_>>();
 
     for file in filenames.iter() {
-        if let Some(filename) = file {
-            println!("the value is: {}", *filename);
+        match file {
+            Some(filename) => {
+                if let Some(raw_name) = filename.splitn(2, '.').next() {
+                    if raw_name != "" {
+                        println!("{} -> {:?}", raw_name, get_naming_style(raw_name));
+                    }
+                }
+            }
+            None => println!("no filename"),
         }
     }
 
@@ -71,7 +80,8 @@ fn get_naming_style(naming: &str) -> Naming {
         static ref CAMEL_RE: Regex = Regex::new("^[a-z]+(?:[A-Z][a-z]+)+$").unwrap();
         static ref SNAKE_RE: Regex = Regex::new("^[a-z]+(?:_[a-z]+)+$").unwrap();
         static ref KEBAB_RE: Regex = Regex::new("^[a-z]+(?:-[a-z]+)+$").unwrap();
-        static ref LOWER_RE: Regex = Regex::new("[a-z]+").unwrap();
+        static ref LOWER_RE: Regex = Regex::new("^[a-z]+").unwrap();
+        static ref UPPER_RE: Regex = Regex::new("^[A-Z]+").unwrap();
     }
     let mut style = Naming::Unknown;
     if PASCAL_RE.is_match(naming) {
@@ -94,6 +104,10 @@ fn get_naming_style(naming: &str) -> Naming {
         style = Naming::Lower;
         return style;
     }
+    if UPPER_RE.is_match(naming) {
+        style = Naming::Upper;
+        return style;
+    }
     style
 }
 
@@ -104,5 +118,6 @@ fn test_get_naming_style() {
     assert_eq!(get_naming_style("snake_case"), Naming::Snake);
     assert_eq!(get_naming_style("kebab-case"), Naming::Kebab);
     assert_eq!(get_naming_style("lower"), Naming::Lower);
+    assert_eq!(get_naming_style("UPPER"), Naming::Upper);
     assert_eq!(get_naming_style("1234"), Naming::Unknown);
 }
