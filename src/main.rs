@@ -7,9 +7,10 @@ extern crate regex;
 
 use regex::Regex;
 use serde::Deserialize;
+use std::collections::HashMap;
 use std::fmt;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 enum Naming {
     Pascal,
     Camel,
@@ -43,7 +44,11 @@ struct File {
     size: Option<u64>,
 }
 
+type LanguageCount = HashMap<Naming, u64>;
+type Info = HashMap<String, LanguageCount>;
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut info: Info = HashMap::new();
     let resp: Response = reqwest::get(&url())?.json()?;
     let filenames: Vec<Option<&str>> = resp
         .tree
@@ -55,15 +60,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for file in filenames.iter() {
         match file {
             Some(filename) => {
-                if let Some(raw_name) = filename.splitn(2, '.').next() {
-                    if raw_name != "" {
-                        println!("{} -> {:?}", raw_name, get_naming_style(raw_name));
+                let mut parts = filename.split('.');
+                let maybe_name = parts.nth(0);
+                let maybe_suffix = parts.last();
+
+                if let (Some(name), Some(suffix)) = (maybe_name, maybe_suffix) {
+                    if name != "" {
+                        let naming_style = get_naming_style(name);
+                        let mut language: LanguageCount = HashMap::new();
+                        language.insert(naming_style, 0);
+
+                        if let Some(style_count) = info
+                            .entry(suffix.to_owned())
+                            .or_insert(language)
+                            .get_mut(&naming_style)
+                        {
+                            *style_count += 1
+                        };
                     }
                 }
             }
             None => println!("no filename"),
         }
     }
+
+    print!("{:#?}", info);
 
     Ok(())
 }
@@ -80,8 +101,8 @@ fn get_naming_style(naming: &str) -> Naming {
         static ref CAMEL_RE: Regex = Regex::new("^[a-z]+(?:[A-Z][a-z]+)+$").unwrap();
         static ref SNAKE_RE: Regex = Regex::new("^[a-z]+(?:_[a-z]+)+$").unwrap();
         static ref KEBAB_RE: Regex = Regex::new("^[a-z]+(?:-[a-z]+)+$").unwrap();
-        static ref LOWER_RE: Regex = Regex::new("^[a-z]+").unwrap();
-        static ref UPPER_RE: Regex = Regex::new("^[A-Z]+").unwrap();
+        static ref LOWER_RE: Regex = Regex::new("^[a-z]+$").unwrap();
+        static ref UPPER_RE: Regex = Regex::new("^[A-Z]+$").unwrap();
     }
     let mut style = Naming::Unknown;
     if PASCAL_RE.is_match(naming) {
@@ -120,4 +141,5 @@ fn test_get_naming_style() {
     assert_eq!(get_naming_style("lower"), Naming::Lower);
     assert_eq!(get_naming_style("UPPER"), Naming::Upper);
     assert_eq!(get_naming_style("1234"), Naming::Unknown);
+    assert_eq!(get_naming_style("forwardRef-component"), Naming::Unknown);
 }
