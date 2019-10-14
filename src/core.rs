@@ -35,28 +35,25 @@ pub fn get_naming_count() -> Result<Info, Box<dyn std::error::Error>> {
         .map(|file| file.path.rsplitn(2, '/').next())
         .collect::<Vec<_>>();
 
-    for file in filenames.iter() {
-        match file {
-            Some(filename) => {
-                let mut parts = filename.split('.');
-                let maybe_name = parts.nth(0);
-                let maybe_suffix = parts.last();
+    for maybe_filename in filenames.iter() {
+        if let Some(filename) = maybe_filename {
+            let mut parts = filename.split('.');
+            let maybe_name = parts.nth(0);
+            let maybe_suffix = parts.last();
 
-                if let (Some(name), Some(suffix)) = (maybe_name, maybe_suffix) {
-                    if name != "" {
-                        let naming_style = get_naming_style(name);
-                        let mut language: LanguageCount = HashMap::new();
-                        language.insert(naming_style, 0);
+            if let (Some(name), Some(suffix)) = (maybe_name, maybe_suffix) {
+                if name != "" {
+                    let naming_style = get_naming_style(name);
+                    let mut language: LanguageCount = HashMap::new();
+                    language.insert(naming_style, 0);
 
-                        *info
-                            .entry(suffix.to_owned())
-                            .or_insert(language)
-                            .entry(naming_style)
-                            .or_insert(0) += 1;
-                    }
+                    *info
+                        .entry(suffix.to_owned())
+                        .or_insert(language)
+                        .entry(naming_style)
+                        .or_insert(0) += 1;
                 }
             }
-            None => println!("no filename"),
         }
     }
     Ok(info)
