@@ -48,13 +48,11 @@ pub fn get_naming_count() -> Result<Info, Box<dyn std::error::Error>> {
                         let mut language: LanguageCount = HashMap::new();
                         language.insert(naming_style, 0);
 
-                        let style_count = info
+                        *info
                             .entry(suffix.to_owned())
                             .or_insert(language)
                             .entry(naming_style)
                             .or_insert(0) += 1;
-
-                        *style_count += 1;
                     }
                 }
             }
