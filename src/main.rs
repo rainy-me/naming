@@ -49,7 +49,7 @@ type Info = HashMap<String, LanguageCount>;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut info: Info = HashMap::new();
-    let resp: Response = reqwest::get(&url())?.json()?;
+    let resp: Response = get_tree("vuejs/vue").unwrap();
     let filenames: Vec<Option<&str>> = resp
         .tree
         .iter()
@@ -89,10 +89,43 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn url() -> String {
-    let url = "https://api.github.com/repos/zeit/next.js/git/trees/004319fa101e3bdf3dc359750e67854686e8c3e9?recursive=1";
+fn get_tree(owner_and_repo: &str) -> Result<Response, reqwest::Error> {
+    let url = [&get_sha(owner_and_repo).unwrap(), "?recursive=1"].concat();
+    println!("sha: {}", url);
+    let resp: Response = reqwest::get(&url)?.json()?;
+    Ok(resp)
+}
 
-    url.to_string()
+#[derive(Deserialize, Debug)]
+struct ShaResponseTreeData {
+    url: String,
+}
+
+#[derive(Deserialize, Debug)]
+struct ShaResponseTree {
+    tree: ShaResponseTreeData,
+}
+
+#[derive(Deserialize, Debug)]
+struct ShaResponseCommit {
+    commit: ShaResponseTree,
+}
+
+#[derive(Deserialize, Debug)]
+struct ShaResponse {
+    commit: ShaResponseCommit,
+}
+
+fn get_sha(owner_and_repo: &str) -> Result<String, reqwest::Error> {
+    let url = [
+        "https://api.github.com/repos/",
+        owner_and_repo,
+        "/branches/master",
+    ]
+    .concat();
+
+    let resp: ShaResponse = reqwest::get(&url)?.json()?;
+    Ok(resp.commit.commit.tree.url)
 }
 
 fn get_naming_style(naming: &str) -> Naming {
