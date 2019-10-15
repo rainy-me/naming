@@ -31,9 +31,10 @@ fn main() {
 
     if let Some(repo) = matches.value_of("repo") {
         let mut info = core::get_naming_count(repo).unwrap();
-        let langs: Vec<&str> = matches.values_of("lang").unwrap().collect::<Vec<_>>();
-
-        info.retain(|key, _| langs.contains(&key.as_str()));
+        if let Some(maybe_langs) = matches.values_of("lang") {
+            let langs = maybe_langs.collect::<Vec<&str>>();
+            info.retain(|key, _| langs.contains(&key.as_str()));
+        }
 
         println!(
             "{}",
