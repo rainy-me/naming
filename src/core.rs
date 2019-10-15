@@ -1,11 +1,12 @@
 use regex::Regex;
+use serde::Serialize;
 use std::collections::HashMap;
 use std::fmt;
 
 use crate::api;
 use api::TreeResponse;
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, Serialize, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Naming {
     Pascal,
     Camel,

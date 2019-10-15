@@ -35,6 +35,9 @@ fn main() {
 
         info.retain(|key, _| langs.contains(&key.as_str()));
 
-        println!("{:#?}", info);
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&info).expect("Failed to serialize data")
+        );
     }
 }
