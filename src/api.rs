@@ -19,7 +19,7 @@ pub struct File {
 
 pub fn get_tree(owner_and_repo: &str) -> Result<TreeResponse, reqwest::Error> {
     let url = [&get_sha(owner_and_repo).unwrap(), "?recursive=1"].concat();
-    println!("sha: {}", url);
+    // println!("sha: {}", url);
     let resp: TreeResponse = reqwest::get(&url)?.json()?;
     Ok(resp)
 }

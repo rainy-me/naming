@@ -25,9 +25,9 @@ impl fmt::Display for Naming {
 pub type LanguageCount = HashMap<Naming, u64>;
 pub type Info = HashMap<String, LanguageCount>;
 
-pub fn get_naming_count() -> Result<Info, Box<dyn std::error::Error>> {
+pub fn get_naming_count(repo: &str) -> Result<Info, reqwest::Error> {
     let mut info: Info = HashMap::new();
-    let resp: TreeResponse = api::get_tree("vuejs/vue").unwrap();
+    let resp: TreeResponse = api::get_tree(repo).unwrap();
     let filenames: Vec<Option<&str>> = resp
         .tree
         .iter()
